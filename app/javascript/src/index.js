@@ -1,74 +1,47 @@
 import $ from 'jquery';
-import { indexTasks, postTask } from './requests.js';
+import { fetchTasks, createTask, markTaskComplete, markTaskActive, deleteTask } from './requests.js';
 
 $(document).ready(function() {
   // Function to fetch and display tasks
-  function fetchTasks() {
-    indexTasks(
-      function(response) {
-        var taskList = $('#taskList');
-        taskList.empty(); // Clear existing tasks
-        response.tasks.forEach(function(task) {
-          taskList.append('<div class="task-item">' +
-            '<span>' + task.content + '</span>' +
-            '<button class="btn btn-success btn-sm ml-2 mark-complete" data-id="' + task.id + '">Complete</button>' +
-            '<button class="btn btn-danger btn-sm ml-2 delete-task" data-id="' + task.id + '">Delete</button>' +
-            '</div>');
-        });
-      },
-      function(request, errorMsg) {
-        console.log('Error fetching tasks:', request, errorMsg);
-      }
-    );
+  function loadTasks() {
+    fetchTasks();
   }
 
   // Initial fetch of tasks
-  fetchTasks();
+  loadTasks();
 
   // Event handler for adding a new task
   $('#addTaskButton').click(function() {
-    var content = $('#taskContent').val();
-    if (content) {
-      postTask(
-        content,
-        function(response) {
-          $('#taskContent').val(''); // Clear input field
-          fetchTasks(); // Reload tasks
-        },
-        function(request, errorMsg) {
-          console.log('Error creating task:', request, errorMsg);
-        }
-      );
+    var title = $('#taskTitle').val();
+    var description = $('#taskDescription').val();
+    if (title && description) {
+      createTask(title, description);
+      $('#taskTitle').val(''); // Clear input field
+      $('#taskDescription').val(''); // Clear input field
+      loadTasks(); // Reload tasks after creation
+    } else {
+      alert('Please enter both a title and description');
     }
   });
 
-  // Event delegation for task actions
-  $('#taskList').on('click', '.mark-complete', function() {
-    var taskId = $(this).data('id');
-    $.ajax({
-      type: 'PUT',
-      url: 'api/tasks/' + taskId + '/mark_complete?api_key=1', // Replace '1' with the actual API key or user ID
-      success: function(response) {
-        fetchTasks(); // Reload tasks
-      },
-      error: function(request, errorMsg) {
-        console.log('Error marking task as complete:', request, errorMsg);
-      }
-    });
+  // Event delegation for marking a task as complete
+  $('#tasks-list').on('click', '.mark-complete', function() {
+    var taskId = $(this).data('task-id');
+    markTaskComplete(taskId);
+    loadTasks(); // Reload tasks after marking as complete
   });
 
-  $('#taskList').on('click', '.delete-task', function() {
-    var taskId = $(this).data('id');
-    $.ajax({
-      type: 'DELETE',
-      url: 'api/tasks/' + taskId + '?api_key=1', // Replace '1' with the actual API key or user ID
-      success: function(response) {
-        fetchTasks(); // Reload tasks
-      },
-      error: function(request, errorMsg) {
-        console.log('Error deleting task:', request, errorMsg);
-      }
-    });
+  // Event delegation for marking a task as active
+  $('#tasks-list').on('click', '.mark-active', function() {
+    var taskId = $(this).data('task-id');
+    markTaskActive(taskId);
+    loadTasks(); // Reload tasks after marking as active
+  });
+
+  // Event delegation for deleting a task
+  $('#tasks-list').on('click', '.delete-task', function() {
+    var taskId = $(this).data('task-id');
+    deleteTask(taskId);
+    loadTasks(); // Reload tasks after deletion
   });
 });
-

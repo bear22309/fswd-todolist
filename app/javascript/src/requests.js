@@ -4,11 +4,16 @@ export const fetchTasks = () => {
       'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
     },
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch tasks');
+      }
+      return response.json();
+    })
     .then(data => {
       const tasksList = document.querySelector('#tasks-list');
       tasksList.innerHTML = '';
-      data.tasks.forEach(task => {
+      data.forEach(task => {
         tasksList.innerHTML += `
           <li>
             <strong>${task.title}</strong>
@@ -32,7 +37,12 @@ export const createTask = (title, description) => {
     },
     body: JSON.stringify({ task: { title, description } }),
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to create task');
+      }
+      return response.json();
+    })
     .then(data => {
       fetchTasks();
     })
@@ -48,7 +58,12 @@ export const updateTask = (taskId, updates) => {
     },
     body: JSON.stringify({ task: updates }),
   })
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update task');
+      }
+      return response.json();
+    })
     .then(data => {
       fetchTasks();
     })
@@ -62,7 +77,10 @@ export const deleteTask = (taskId) => {
       'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
     },
   })
-    .then(() => {
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
       fetchTasks();
     })
     .catch(error => console.error('Error deleting task:', error));
