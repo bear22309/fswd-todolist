@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { fetchTasks, createTask, markTaskComplete, markTaskActive, deleteTask } from './requests.js';
+import { fetchTasks, createTask, markTaskComplete, markTaskActive, deleteTask } from '../requests.js';
 
 $(document).ready(function() {
   // Function to fetch and display tasks
