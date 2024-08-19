@@ -1,4 +1,4 @@
-import { fetchTasks, createTask, updateTask, deleteTask, markTaskComplete, markTaskActive } from './requests';
+import { fetchTasks, createTask, updateTask, deleteTask, markTaskComplete, markTaskActive } from '../src/requests.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchTasks();
