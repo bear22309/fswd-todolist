@@ -9,7 +9,13 @@
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
   </head>
   <body class="<%= controller_name %> <%= action_name %>">
+    <!-- Main content area -->
+    <div id="content">
+      <!-- Task list container -->
+      <ul id="tasks-list"></ul>
+      <!-- Other content can go here -->
+    </div>
+
     <%= yield %>
   </body>
 </html>
-

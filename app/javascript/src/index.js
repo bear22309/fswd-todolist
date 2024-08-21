@@ -1,11 +1,12 @@
 import $ from 'jquery';
-import { fetchTasks, createTask, markTaskComplete, markTaskActive, deleteTask } from '../src/requests.js'; 
+import { fetchTasks, createTask, markTaskComplete, markTaskActive, deleteTask } from '../src/requests.js';
 
 $(document).ready(function() {
-  
+  const apiKey = 'apiKey'; 
+
   function loadTasks() {
-    fetchTasks().then(tasks => {
-      $('#tasks-list').empty(); 
+    fetchTasks(apiKey).then(tasks => {
+      $('#tasks-list').empty();
       tasks.forEach(task => {
         let taskItem = `
           <li>
@@ -24,18 +25,16 @@ $(document).ready(function() {
     });
   }
 
- 
   loadTasks();
 
-  
   $('#addTaskButton').click(function() {
     var title = $('#taskTitle').val();
     var description = $('#taskDescription').val();
     if (title && description) {
-      createTask(title, description).then(() => {
-        $('#taskTitle').val(''); 
-        $('#taskDescription').val(''); 
-        loadTasks(); 
+      createTask(title, description, apiKey).then(() => {
+        $('#taskTitle').val('');
+        $('#taskDescription').val('');
+        loadTasks();
       }).catch(error => {
         console.error('Error creating task:', error);
       });
@@ -44,31 +43,28 @@ $(document).ready(function() {
     }
   });
 
-  
   $('#tasks-list').on('click', '.mark-complete', function() {
     var taskId = $(this).data('task-id');
-    markTaskComplete(taskId).then(() => {
+    markTaskComplete(taskId, apiKey).then(() => {
       loadTasks();
     }).catch(error => {
       console.error('Error marking task complete:', error);
     });
   });
 
-  
   $('#tasks-list').on('click', '.mark-active', function() {
     var taskId = $(this).data('task-id');
-    markTaskActive(taskId).then(() => {
-      loadTasks(); 
+    markTaskActive(taskId, apiKey).then(() => {
+      loadTasks();
     }).catch(error => {
       console.error('Error marking task active:', error);
     });
   });
 
-  
   $('#tasks-list').on('click', '.delete-task', function() {
     var taskId = $(this).data('task-id');
-    deleteTask(taskId).then(() => {
-      loadTasks(); 
+    deleteTask(taskId, apiKey).then(() => {
+      loadTasks();
     }).catch(error => {
       console.error('Error deleting task:', error);
     });

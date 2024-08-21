@@ -1,95 +1,50 @@
-export const fetchTasks = () => {
-  fetch('/api/tasks', {
-    headers: {
-      'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
-    },
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to fetch tasks');
-      }
-      return response.json();
-    })
-    .then(data => {
-      const tasksList = document.querySelector('#tasks-list');
-      tasksList.innerHTML = '';
-      data.forEach(task => {
-        tasksList.innerHTML += `
-          <li>
-            <strong>${task.title}</strong>
-            <p>${task.description}</p>
-            <button class="mark-complete" data-task-id="${task.id}">Mark Complete</button>
-            <button class="mark-active" data-task-id="${task.id}">Mark Active</button>
-            <button class="delete-task" data-task-id="${task.id}">Delete</button>
-          </li>
-        `;
-      });
-    })
-    .catch(error => console.error('Error fetching tasks:', error));
+import $ from 'jquery';
+
+const apiBaseUrl = '/api';
+
+
+export const fetchTasks = (apiKey) => {
+  return $.ajax({
+    url: `${apiBaseUrl}/tasks`,
+    type: 'GET',
+    data: { api_key: apiKey }, // Send API key here
+    dataType: 'json'
+  });
 };
 
-export const createTask = (title, description) => {
-  fetch('/api/tasks', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
-    },
-    body: JSON.stringify({ task: { title, description } }),
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to create task');
-      }
-      return response.json();
-    })
-    .then(data => {
-      fetchTasks();
-    })
-    .catch(error => console.error('Error creating task:', error));
+export const createTask = (title, description, apiKey) => {
+  return $.ajax({
+    url: `${apiBaseUrl}/tasks`,
+    type: 'POST',
+    data: { task: { title, description }, api_key: apiKey }, // API key and task data
+    dataType: 'json'
+  });
 };
 
-export const updateTask = (taskId, updates) => {
-  fetch(`/api/tasks/${taskId}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
-    },
-    body: JSON.stringify({ task: updates }),
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to update task');
-      }
-      return response.json();
-    })
-    .then(data => {
-      fetchTasks();
-    })
-    .catch(error => console.error('Error updating task:', error));
+export const markTaskComplete = (taskId, apiKey) => {
+  return $.ajax({
+    url: `${apiBaseUrl}/tasks/${taskId}/mark_complete`,  
+    type: 'PUT',
+    data: { api_key: apiKey }, // API key
+    dataType: 'json'
+  });
 };
 
-export const deleteTask = (taskId) => {
-  fetch(`/api/tasks/${taskId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': 'Bearer ' + sessionStorage.getItem('token'),
-    },
-  })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to delete task');
-      }
-      fetchTasks();
-    })
-    .catch(error => console.error('Error deleting task:', error));
+
+export const markTaskActive = (taskId, apiKey) => {
+  return $.ajax({
+    url: `${apiBaseUrl}/tasks/${taskId}/mark_active`,
+    type: 'PUT',
+    data: { api_key: apiKey }, // API key
+    dataType: 'json'
+  });
 };
 
-export const markTaskComplete = (taskId) => {
-  updateTask(taskId, { completed: true });
-};
-
-export const markTaskActive = (taskId) => {
-  updateTask(taskId, { completed: false });
+export const deleteTask = (taskId, apiKey) => {
+  return $.ajax({
+    url: `${apiBaseUrl}/tasks/${taskId}`,
+    type: 'DELETE',
+    data: { api_key: apiKey }, // API key
+    dataType: 'json'
+  });
 };

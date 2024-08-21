@@ -52,4 +52,3 @@ end
 
 # PostgreSQL for production
 gem 'pg', '~> 1.2'
-
