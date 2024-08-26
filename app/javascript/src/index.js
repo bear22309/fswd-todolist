@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { fetchTasks, createTask, markTaskComplete, markTaskActive, deleteTask } from '../src/requests.js';
 
 $(document).ready(function() {
-  const apiKey = window.env.API_KEY; // Access API key from the global window object
+  const apiKey = window.env.API_KEY;
 
   function loadTasks() {
     fetchTasks(apiKey).then(tasks => {
@@ -10,7 +10,7 @@ $(document).ready(function() {
       if (Array.isArray(tasks)) {
         tasks.forEach(task => {
           let taskItem = `
-            <li>
+            <li id="task-${task.id}">
               <h3>${task.title}</h3>
               <p>${task.description}</p>
               <button class="delete-task" data-task-id="${task.id}">Delete</button>
@@ -23,9 +23,11 @@ $(document).ready(function() {
         });
       } else {
         console.error('Expected an array of tasks but got:', tasks);
+        alert('Error loading tasks.');
       }
     }).catch(error => {
       console.error('Error fetching tasks:', error);
+      alert('Error fetching tasks. Please try again.');
     });
   }
 
@@ -35,80 +37,54 @@ $(document).ready(function() {
     const title = $('#taskTitle').val();
     const description = $('#taskDescription').val();
     if (title && description) {
-      createTask(title, description, apiKey).then(() => {
+      createTask(title, description, apiKey).then(newTask => {
         $('#taskTitle').val('');
         $('#taskDescription').val('');
-        loadTasks();
+        const taskItem = `
+          <li id="task-${newTask.id}">
+            <h3>${newTask.title}</h3>
+            <p>${newTask.description}</p>
+            <button class="delete-task" data-task-id="${newTask.id}">Delete</button>
+            <button class="mark-complete" data-task-id="${newTask.id}">Mark Complete</button>
+          </li>
+        `;
+        $('#tasks-list').append(taskItem);
       }).catch(error => {
         console.error('Error creating task:', error);
+        alert('Error creating task. Please try again.');
       });
     } else {
-      alert('Please enter both a title and description');
+      alert('Please enter both a title and description.');
     }
   });
 
   $('#tasks-list').on('click', '.mark-complete', function() {
     const taskId = $(this).data('task-id');
-    markTaskComplete(taskId, apiKey).then(() => {
-      loadTasks();
-    }).catch(error => {
+    $(this).replaceWith(`<button class="mark-active" data-task-id="${taskId}">Mark Active</button>`);
+    markTaskComplete(taskId, apiKey).catch(error => {
       console.error('Error marking task complete:', error);
+      alert('Error marking task complete. Please try again.');
+      $(`#task-${taskId} .mark-active`).replaceWith(`<button class="mark-complete" data-task-id="${taskId}">Mark Complete</button>`);
     });
   });
 
   $('#tasks-list').on('click', '.mark-active', function() {
     const taskId = $(this).data('task-id');
-    markTaskActive(taskId, apiKey).then(() => {
-      loadTasks();
-    }).catch(error => {
+    $(this).replaceWith(`<button class="mark-complete" data-task-id="${taskId}">Mark Complete</button>`);
+    markTaskActive(taskId, apiKey).catch(error => {
       console.error('Error marking task active:', error);
+      alert('Error marking task active. Please try again.');
+      $(`#task-${taskId} .mark-complete`).replaceWith(`<button class="mark-active" data-task-id="${taskId}">Mark Active</button>`);
     });
   });
 
   $('#tasks-list').on('click', '.delete-task', function() {
     const taskId = $(this).data('task-id');
-    deleteTask(taskId, apiKey).then(() => {
-      loadTasks();
-    }).catch(error => {
+    $(`#task-${taskId}`).remove();
+    deleteTask(taskId, apiKey).catch(error => {
       console.error('Error deleting task:', error);
+      alert('Error deleting task. Please try again.');
+      loadTasks(); // Reload the tasks list in case of failure to restore the task
     });
-  });
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const newTaskForm = document.querySelector('#new-task-form');
-  newTaskForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const title = document.querySelector('#new-task-title').value;
-    const description = document.querySelector('#new-task-description').value;
-    createTask(title, description, window.env.API_KEY).then(() => {
-      loadTasks();
-    }).catch(error => {
-      console.error('Error creating task:', error);
-    });
-  });
-
-  const tasksList = document.querySelector('#tasks-list');
-  tasksList.addEventListener('click', (event) => {
-    const taskId = event.target.dataset.taskId;
-    if (event.target.classList.contains('delete-task')) {
-      deleteTask(taskId, window.env.API_KEY).then(() => {
-        loadTasks();
-      }).catch(error => {
-        console.error('Error deleting task:', error);
-      });
-    } else if (event.target.classList.contains('mark-complete')) {
-      markTaskComplete(taskId, window.env.API_KEY).then(() => {
-        loadTasks();
-      }).catch(error => {
-        console.error('Error marking task complete:', error);
-      });
-    } else if (event.target.classList.contains('mark-active')) {
-      markTaskActive(taskId, window.env.API_KEY).then(() => {
-        loadTasks();
-      }).catch(error => {
-        console.error('Error marking task active:', error);
-      });
-    }
   });
 });

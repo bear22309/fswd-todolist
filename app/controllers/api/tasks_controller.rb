@@ -101,8 +101,11 @@ module Api
     private
 
     def find_user
+      Rails.logger.info("Received API Key: #{params[:api_key]}")
       @user = User.find_by(id: params[:api_key])
+      render json: { error: 'User not found' }, status: :not_found unless @user
     end
+    
 
     def task_params
       params.require(:task).permit(:content, :completed)
