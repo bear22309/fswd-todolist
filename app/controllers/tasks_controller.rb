@@ -1,27 +1,22 @@
 class TasksController < ApplicationController
-  before_action :validate_user
+  before_action :set_user
 
   def show
-    user = User.find_by(id: params[:api_key])
-    @task = user.tasks.find_by(id: params[:id])
-
-    unless @task
-      return render json: { error: 'Task not found' }, status: :not_found
+    @task = @current_user.tasks.find_by(id: params[:id])
+    if @task
+      render json: @task, status: :ok
+    else
+      render json: { error: 'Task not found' }, status: :not_found
     end
-
-    render json: @task, status: :ok
   end
 
   def index
-    user = User.find_by(id: params[:api_key])
-    @tasks = user.tasks.all
+    @tasks = @current_user.tasks.all
     render json: @tasks, status: :ok
   end
 
   def create
-    user = User.find_by(id: params[:api_key])
-    @task = user.tasks.new(task_params)
-
+    @task = @current_user.tasks.new(task_params)
     if @task.save
       render json: @task, status: :created
     else
@@ -30,9 +25,7 @@ class TasksController < ApplicationController
   end
 
   def destroy
-    user = User.find_by(id: params[:api_key])
-    @task = user.tasks.find_by(id: params[:id])
-
+    @task = @current_user.tasks.find_by(id: params[:id])
     if @task&.destroy
       render json: { success: true }, status: :ok
     else
@@ -41,9 +34,7 @@ class TasksController < ApplicationController
   end
 
   def update
-    user = User.find_by(id: params[:api_key])
-    @task = user.tasks.find_by(id: params[:id])
-
+    @task = @current_user.tasks.find_by(id: params[:id])
     if @task.update(task_params)
       render json: @task, status: :ok
     else
@@ -52,9 +43,7 @@ class TasksController < ApplicationController
   end
 
   def mark_complete
-    user = User.find_by(id: params[:api_key])
-    @task = user.tasks.find_by(id: params[:id])
-
+    @task = @current_user.tasks.find_by(id: params[:id])
     if @task.update(completed: true)
       render json: @task, status: :ok
     else
@@ -63,9 +52,7 @@ class TasksController < ApplicationController
   end
 
   def mark_active
-    user = User.find_by(id: params[:api_key])
-    @task = user.tasks.find_by(id: params[:id])
-
+    @task = @current_user.tasks.find_by(id: params[:id])
     if @task.update(completed: false)
       render json: @task, status: :ok
     else
@@ -79,10 +66,7 @@ class TasksController < ApplicationController
     params.require(:task).permit(:content, :completed)  # Adjust these parameters to match your Task model
   end
 
-  def validate_user
-    user = User.find_by(id: params[:api_key])
-    unless user
-      render json: { status: '401', title: 'Unauthorized User', detail: 'User is not found.' }, status: :unauthorized
-    end
+  def set_user
+    @current_user = User.first_or_create!(name: 'Default User')
   end
-end
+  

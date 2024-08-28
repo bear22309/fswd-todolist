@@ -1,114 +1,71 @@
 module Api
   class TasksController < ApplicationController
-    skip_before_action :verify_authenticity_token
-
-    before_action :find_user, only: [:index, :show, :create, :update, :mark_complete, :mark_active, :destroy]
+    # Remove before_action since we are not using authentication
+    # before_action :set_user, only: [:index, :create, :update, :destroy, :mark_complete, :mark_active]
 
     def index
-      if @user
-        @tasks = @user.tasks
-        render 'index.jbuilder', status: :ok
-      else
-        Rails.logger.debug("User not found with API key: #{params[:api_key]}")
-        render json: { error: 'User not found' }, status: :not_found
-      end
+      @tasks = Task.all
+      render json: @tasks, status: :ok
     end
 
     def show
-      if @user
-        @task = @user.tasks.find_by(id: params[:id])
-        if @task
-          render 'show.jbuilder', status: :ok
-        else
-          render json: { error: 'Task not found' }, status: :not_found
-        end
+      @task = Task.find_by(id: params[:id])
+      if @task
+        render json: @task, status: :ok
       else
-        Rails.logger.debug("User not found with API key: #{params[:api_key]}")
-        render json: { error: 'User not found' }, status: :not_found
+        render json: { error: 'Task not found' }, status: :not_found
       end
     end
 
     def create
-      if @user
-        @task = @user.tasks.new(task_params)
-        if @task.save
-          render 'show.jbuilder', status: :created
-        else
-          render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
-        end
+      @task = Task.new(task_params)
+      if @task.save
+        render json: @task, status: :created
       else
-        Rails.logger.debug("User not found with API key: #{params[:api_key]}")
-        render json: { error: 'User not found' }, status: :not_found
-      end
-    end
-
-    def update
-      if @user
-        @task = @user.tasks.find_by(id: params[:id])
-        if @task.update(task_params)
-          render 'show.jbuilder', status: :ok
-        else
-          render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
-        end
-      else
-        Rails.logger.debug("User not found with API key: #{params[:api_key]}")
-        render json: { error: 'User not found' }, status: :not_found
-      end
-    end
-
-    def mark_complete
-      if @user
-        @task = @user.tasks.find_by(id: params[:id])
-        if @task.update(completed: true)
-          render 'show.jbuilder', status: :ok
-        else
-          render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
-        end
-      else
-        Rails.logger.debug("User not found with API key: #{params[:api_key]}")
-        render json: { error: 'User not found' }, status: :not_found
-      end
-    end
-
-    def mark_active
-      if @user
-        @task = @user.tasks.find_by(id: params[:id])
-        if @task.update(completed: false)
-          render 'show.jbuilder', status: :ok
-        else
-          render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
-        end
-      else
-        Rails.logger.debug("User not found with API key: #{params[:api_key]}")
-        render json: { error: 'User not found' }, status: :not_found
+        render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
       end
     end
 
     def destroy
-      if @user
-        @task = @user.tasks.find_by(id: params[:id])
-        if @task.destroy
-          head :no_content
-        else
-          render json: { errors: 'Task could not be deleted' }, status: :unprocessable_entity
-        end
+      @task = Task.find_by(id: params[:id])
+      if @task&.destroy
+        render json: { success: true }, status: :ok
       else
-        Rails.logger.debug("User not found with API key: #{params[:api_key]}")
-        render json: { error: 'User not found' }, status: :not_found
+        render json: { error: 'Task could not be deleted' }, status: :unprocessable_entity
+      end
+    end
+
+    def update
+      @task = Task.find_by(id: params[:id])
+      if @task.update(task_params)
+        render json: @task, status: :ok
+      else
+        render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+
+    def mark_complete
+      @task = Task.find_by(id: params[:id])
+      if @task.update(completed: true)
+        render json: @task, status: :ok
+      else
+        render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+
+    def mark_active
+      @task = Task.find_by(id: params[:id])
+      if @task.update(completed: false)
+        render json: @task, status: :ok
+      else
+        render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
       end
     end
 
     private
 
-    def find_user
-      Rails.logger.info("Received API Key: #{params[:api_key]}")
-      @user = User.find_by(id: params[:api_key])
-      render json: { error: 'User not found' }, status: :not_found unless @user
-    end
-    
-
     def task_params
-      params.require(:task).permit(:content, :completed)
+      params.require(:task).permit(:content)
     end
   end
 end

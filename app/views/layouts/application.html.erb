@@ -1,3 +1,4 @@
+<!-- layouts/application.html -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -8,7 +9,7 @@
     <%= stylesheet_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
     
-    <!-- Add this script tag to expose the API key -->
+    <!-- Expose the API key -->
     <script>
       window.env = {
         API_KEY: "<%= ENV['API_KEY'] %>"
@@ -18,8 +19,6 @@
   <body class="<%= controller_name %> <%= action_name %>">
     <!-- Main content area -->
     <div id="content">
-      <!-- Task list container -->
-      <ul id="tasks-list"></ul>
       <!-- Other content can go here -->
     </div>
 

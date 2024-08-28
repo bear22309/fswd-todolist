@@ -57,16 +57,7 @@ $(document).ready(function() {
       alert('Please enter both a title and description.');
     }
   });
-
-  $('#tasks-list').on('click', '.mark-complete', function() {
-    const taskId = $(this).data('task-id');
-    $(this).replaceWith(`<button class="mark-active" data-task-id="${taskId}">Mark Active</button>`);
-    markTaskComplete(taskId, apiKey).catch(error => {
-      console.error('Error marking task complete:', error);
-      alert('Error marking task complete. Please try again.');
-      $(`#task-${taskId} .mark-active`).replaceWith(`<button class="mark-complete" data-task-id="${taskId}">Mark Complete</button>`);
-    });
-  });
+  
 
   $('#tasks-list').on('click', '.mark-active', function() {
     const taskId = $(this).data('task-id');

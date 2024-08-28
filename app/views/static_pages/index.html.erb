@@ -1,3 +1,4 @@
+<!-- static_pages/index.html -->
 <%= javascript_pack_tag 'index', 'data-turbolinks-track': 'reload' %>
 
 <div class="container">
@@ -5,98 +6,15 @@
     <div class="col-12">
       <h1 class="text-center mt-4">To Do List</h1>
 
-      <!-- Add your task input and list elements here -->
+      <!-- Task input and list elements -->
       <div class="task-input mb-3">
-        <input type="text" id="taskContent" class="form-control" placeholder="Add a new task...">
+        <input type="text" id="taskTitle" class="form-control" placeholder="Add a new task...">
         <button id="addTaskButton" class="btn btn-primary mt-2">Add Task</button>
       </div>
 
-      <div id="taskList" class="mt-4">
+      <div id="tasks-list" class="mt-4">
         <!-- Tasks will be dynamically loaded here -->
       </div>
     </div>
   </div>
 </div>
-
-<script>
-  // jQuery document ready function
-  $(document).ready(function() {
-    // Function to fetch and display tasks
-    function fetchTasks() {
-      $.ajax({
-        type: 'GET',
-        url: 'api/tasks?api_key=1', // Replace '1' with the actual API key or user ID
-        success: function(response) {
-          var taskList = $('#taskList');
-          taskList.empty(); // Clear existing tasks
-          response.tasks.forEach(function(task) {
-            taskList.append('<div class="task-item">' +
-              '<span>' + task.content + '</span>' +
-              '<button class="btn btn-success btn-sm ml-2 mark-complete" data-id="' + task.id + '">Complete</button>' +
-              '<button class="btn btn-danger btn-sm ml-2 delete-task" data-id="' + task.id + '">Delete</button>' +
-              '</div>');
-          });
-        },
-        error: function(request, errorMsg) {
-          console.log('Error fetching tasks:', request, errorMsg);
-        }
-      });
-    }
-
-    // Initial fetch of tasks
-    fetchTasks();
-
-    // Event handler for adding a new task
-    $('#addTaskButton').click(function() {
-      var content = $('#taskContent').val();
-      if (content) {
-        $.ajax({
-          type: 'POST',
-          url: 'api/tasks?api_key=1', // Replace '1' with the actual API key or user ID
-          data: {
-            task: {
-              content: content
-            }
-          },
-          success: function(response) {
-            $('#taskContent').val(''); // Clear input field
-            fetchTasks(); // Reload tasks
-          },
-          error: function(request, errorMsg) {
-            console.log('Error creating task:', request, errorMsg);
-          }
-        });
-      }
-    });
-
-    // Event delegation for task actions
-    $('#taskList').on('click', '.mark-complete', function() {
-      var taskId = $(this).data('id');
-      $.ajax({
-        type: 'PUT',
-        url: 'api/tasks/' + taskId + '/mark_complete?api_key=1', // Replace '1' with the actual API key or user ID
-        success: function(response) {
-          fetchTasks(); // Reload tasks
-        },
-        error: function(request, errorMsg) {
-          console.log('Error marking task as complete:', request, errorMsg);
-        }
-      });
-    });
-
-    $('#taskList').on('click', '.delete-task', function() {
-      var taskId = $(this).data('id');
-      $.ajax({
-        type: 'DELETE',
-        url: 'api/tasks/' + taskId + '?api_key=1', // Replace '1' with the actual API key or user ID
-        success: function(response) {
-          fetchTasks(); // Reload tasks
-        },
-        error: function(request, errorMsg) {
-          console.log('Error deleting task:', request, errorMsg);
-        }
-      });
-    });
-  });
-</script>
-
