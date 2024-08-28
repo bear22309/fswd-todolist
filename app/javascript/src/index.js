@@ -9,10 +9,11 @@ $(document).ready(function() {
       $('#tasks-list').empty();
       if (Array.isArray(tasks)) {
         tasks.forEach(task => {
+          // Ensure `task` object has `id`, `title`, and `description` properties
           let taskItem = `
             <li id="task-${task.id}">
-              <h3>${task.title}</h3>
-              <p>${task.description}</p>
+              <h3>${task.title || 'Untitled'}</h3>
+              <p>${task.description || 'No description'}</p>
               <button class="delete-task" data-task-id="${task.id}">Delete</button>
               ${task.completed ? 
                 `<button class="mark-active" data-task-id="${task.id}">Mark Active</button>` :
@@ -57,7 +58,6 @@ $(document).ready(function() {
       alert('Please enter both a title and description.');
     }
   });
-  
 
   $('#tasks-list').on('click', '.mark-active', function() {
     const taskId = $(this).data('task-id');
