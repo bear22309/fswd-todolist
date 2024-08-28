@@ -1,17 +1,16 @@
 import $ from 'jquery';
 
 const apiBaseUrl = '/api';
+const apiKey = 1
+const qs = 'api_key=${apiKey}'
 
-export function createTask(title, description) {
-  const apiKey = process.env.REACT_APP_API_KEY;
-  console.log('Creating task with API key:', apiKey); // Debugging line
-  return fetch(`${apiBaseUrl}/tasks`, {
+export function createTask(content) {
+  return fetch('${apiBaseUrl}/tasks?${qs}', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}` // Correctly passing the API key as Bearer token
     },
-    body: JSON.stringify({ task: { title, description } })
+    body: JSON.stringify({ task: { title, content } })
   }).then(response => {
     if (!response.ok) {
       throw new Error('Network response was not ok');
@@ -21,11 +20,10 @@ export function createTask(title, description) {
 }
 
 export function fetchTasks() {
-  const apiKey = process.env.REACT_APP_API_KEY;
-  return fetch(`${apiBaseUrl}/tasks`, {
+  return fetch(`${apiBaseUrl}/tasks?${qs}`, {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}` // Correctly passing the API key as Bearer token
+       
     }
   }).then(response => {
     if (!response.ok) {
@@ -36,13 +34,9 @@ export function fetchTasks() {
 }
 
 export function markTaskComplete(taskId) {
-  const apiKey = process.env.REACT_APP_API_KEY;
   return $.ajax({
-    url: `${apiBaseUrl}/tasks/${taskId}/mark_complete`,
+    url: `${apiBaseUrl}/tasks/${taskId}/mark_complete?${qs}`,
     type: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${apiKey}` // Adding authorization header
-    },
     dataType: 'json'
   }).fail((jqXHR, textStatus, errorThrown) => {
     console.error('Error marking task complete:', textStatus, errorThrown);
@@ -51,13 +45,9 @@ export function markTaskComplete(taskId) {
 }
 
 export function markTaskActive(taskId) {
-  const apiKey = process.env.REACT_APP_API_KEY;
   return $.ajax({
-    url: `${apiBaseUrl}/tasks/${taskId}/mark_active`,
+    url: `${apiBaseUrl}/tasks/${taskId}/mark_complete?${qs}`,
     type: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${apiKey}` // Adding authorization header
-    },
     dataType: 'json'
   }).fail((jqXHR, textStatus, errorThrown) => {
     console.error('Error marking task active:', textStatus, errorThrown);
@@ -66,13 +56,9 @@ export function markTaskActive(taskId) {
 }
 
 export function deleteTask(taskId) {
-  const apiKey = process.env.REACT_APP_API_KEY;
   return $.ajax({
-    url: `${apiBaseUrl}/tasks/${taskId}`,
+    url: `${apiBaseUrl}/tasks/${taskId}/mark_complete?${qs}`,
     type: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${apiKey}` // Adding authorization header
-    },
     dataType: 'json'
   }).fail((jqXHR, textStatus, errorThrown) => {
     console.error('Error deleting task:', textStatus, errorThrown);
@@ -80,9 +66,7 @@ export function deleteTask(taskId) {
   });
 }
 
-// Event handler for DOM-ready
 $(document).ready(() => {
-  // Load tasks and render them in the DOM
   const loadTasks = () => {
     fetchTasks().then(tasks => {
       $('#tasks-list').empty();
