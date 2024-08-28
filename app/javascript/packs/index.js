@@ -2,17 +2,14 @@
 import { fetchTasks, createTask, markTaskComplete, markTaskActive, deleteTask } from '../src/requests.js';
 
 $(document).ready(function() {
-  const apiKey = window.env.API_KEY;
-
   function loadTasks() {
-    fetchTasks(apiKey).then(tasks => {
+    fetchTasks().then(tasks => {
       $('#tasks-list').empty();
       if (Array.isArray(tasks)) {
         tasks.forEach(task => {
           let taskItem = `
             <li id="task-${task.id}">
-              <h3>${task.title}</h3>
-              <p>${task.description}</p>
+              <h3>${task.content}</h3>
               <button class="delete-task" data-task-id="${task.id}">Delete</button>
               ${task.completed ? 
                 `<button class="mark-active" data-task-id="${task.id}">Mark Active</button>` :
@@ -34,33 +31,24 @@ $(document).ready(function() {
   loadTasks();
 
   $('#addTaskButton').click(function() {
-    const title = $('#taskTitle').val();
+    const content = $('#taskTitle').val();
     const description = $('#taskDescription').val();
-    if (title && description) {
-      createTask(title, description, apiKey).then(newTask => {
-        $('#taskTitle').val('');
-        $('#taskDescription').val('');
-        const taskItem = `
-          <li id="task-${newTask.id}">
-            <h3>${newTask.title}</h3>
-            <p>${newTask.description}</p>
-            <button class="delete-task" data-task-id="${newTask.id}">Delete</button>
-            <button class="mark-complete" data-task-id="${newTask.id}">Mark Complete</button>
-          </li>
-        `;
-        $('#tasks-list').append(taskItem);
+    if (content) {
+      createTask(content).then(() => {
+        loadTasks();
+        $('#taskTitle').val("")
       }).catch(error => {
         console.error('Error creating task:', error);
         alert('Error creating task. Please try again.');
       });
     } else {
-      alert('Please enter both a title and description.');
+      alert('Please enter both a task.');
     }
   });
 
   $('#tasks-list').on('click', '.mark-complete', function() {
     const taskId = $(this).data('task-id');
-    markTaskComplete(taskId, apiKey).then(() => {
+    markTaskComplete(taskId).then(() => {
       loadTasks();
     }).catch(error => {
       console.error('Error marking task complete:', error);
@@ -69,7 +57,7 @@ $(document).ready(function() {
 
   $('#tasks-list').on('click', '.mark-active', function() {
     const taskId = $(this).data('task-id');
-    markTaskActive(taskId, apiKey).then(() => {
+    markTaskActive(taskId).then(() => {
       loadTasks();
     }).catch(error => {
       console.error('Error marking task active:', error);
@@ -79,9 +67,11 @@ $(document).ready(function() {
   $('#tasks-list').on('click', '.delete-task', function() {
     const taskId = $(this).data('task-id');
     $(`#task-${taskId}`).remove();
-    deleteTask(taskId, apiKey).catch(error => {
-      console.error('Error deleting task:', error);
+    deleteTask(taskId).then(() => {
       loadTasks();
+    }).catch(error => {
+      console.error('Error deleting task:', error);
+      
     });
   });
 });
