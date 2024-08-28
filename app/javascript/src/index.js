@@ -9,11 +9,9 @@ $(document).ready(function() {
       $('#tasks-list').empty();
       if (Array.isArray(tasks)) {
         tasks.forEach(task => {
-          // Ensure `task` object has `id`, `title`, and `description` properties
           let taskItem = `
             <li id="task-${task.id}">
               <h3>${task.title || 'Untitled'}</h3>
-              <p>${task.description || 'No description'}</p>
               <button class="delete-task" data-task-id="${task.id}">Delete</button>
               ${task.completed ? 
                 `<button class="mark-active" data-task-id="${task.id}">Mark Active</button>` :
@@ -36,15 +34,12 @@ $(document).ready(function() {
 
   $('#addTaskButton').click(function() {
     const title = $('#taskTitle').val();
-    const description = $('#taskDescription').val();
-    if (title && description) {
-      createTask(title, description, apiKey).then(newTask => {
+    if (title) {
+      createTask(title, '', apiKey).then(newTask => {
         $('#taskTitle').val('');
-        $('#taskDescription').val('');
         const taskItem = `
           <li id="task-${newTask.id}">
             <h3>${newTask.title}</h3>
-            <p>${newTask.description}</p>
             <button class="delete-task" data-task-id="${newTask.id}">Delete</button>
             <button class="mark-complete" data-task-id="${newTask.id}">Mark Complete</button>
           </li>
@@ -55,7 +50,7 @@ $(document).ready(function() {
         alert('Error creating task. Please try again.');
       });
     } else {
-      alert('Please enter both a title and description.');
+      alert('Please enter a task title.');
     }
   });
 

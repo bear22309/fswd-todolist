@@ -2,47 +2,47 @@ import $ from 'jquery';
 
 const apiBaseUrl = '/api';
 
-// Fetch all tasks
-export function fetchTasks(apiKey) {
-  return $.ajax({
-    url: `${apiBaseUrl}/tasks?api_key=${apiKey}`,
-    method: 'GET',
-    dataType: 'json'
-  }).then(response => {
-    if (Array.isArray(response)) {
-      return response;
-    } else {
-      console.error('Expected an array but received:', response);
-      return [];
-    }
-  }).catch(error => {
-    console.error('Error fetching tasks:', error);
-    return [];
-  });
-}
-
-// Create a new task
-export function createTask(title, description, apiKey) {
-  return $.ajax({
-    url: `${apiBaseUrl}/tasks?api_key=${apiKey}`,
+export function createTask(title, description) {
+  const apiKey = process.env.REACT_APP_API_KEY;
+  console.log('Creating task with API key:', apiKey); // Debugging line
+  return fetch(`${apiBaseUrl}/tasks`, {
     method: 'POST',
-    dataType: 'json',
-    data: {
-      task: {
-        title: title,
-        description: description
-      }
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}` // Correctly passing the API key as Bearer token
+    },
+    body: JSON.stringify({ task: { title, description } })
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
-  }).catch(error => {
-    console.error('Error creating task:', error);
+    return response.json();
   });
 }
 
-// Mark a task as complete
-export function markTaskComplete(taskId, apiKey) {
+export function fetchTasks() {
+  const apiKey = process.env.REACT_APP_API_KEY;
+  return fetch(`${apiBaseUrl}/tasks`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}` // Correctly passing the API key as Bearer token
+    }
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  });
+}
+
+export function markTaskComplete(taskId) {
+  const apiKey = process.env.REACT_APP_API_KEY;
   return $.ajax({
-    url: `${apiBaseUrl}/tasks/${taskId}/mark_complete?api_key=${apiKey}`,
+    url: `${apiBaseUrl}/tasks/${taskId}/mark_complete`,
     type: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${apiKey}` // Adding authorization header
+    },
     dataType: 'json'
   }).fail((jqXHR, textStatus, errorThrown) => {
     console.error('Error marking task complete:', textStatus, errorThrown);
@@ -50,11 +50,14 @@ export function markTaskComplete(taskId, apiKey) {
   });
 }
 
-// Mark a task as active
-export function markTaskActive(taskId, apiKey) {
+export function markTaskActive(taskId) {
+  const apiKey = process.env.REACT_APP_API_KEY;
   return $.ajax({
-    url: `${apiBaseUrl}/tasks/${taskId}/mark_active?api_key=${apiKey}`,
+    url: `${apiBaseUrl}/tasks/${taskId}/mark_active`,
     type: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${apiKey}` // Adding authorization header
+    },
     dataType: 'json'
   }).fail((jqXHR, textStatus, errorThrown) => {
     console.error('Error marking task active:', textStatus, errorThrown);
@@ -62,11 +65,14 @@ export function markTaskActive(taskId, apiKey) {
   });
 }
 
-// Delete a task
-export function deleteTask(taskId, apiKey) {
+export function deleteTask(taskId) {
+  const apiKey = process.env.REACT_APP_API_KEY;
   return $.ajax({
-    url: `${apiBaseUrl}/tasks/${taskId}?api_key=${apiKey}`,
+    url: `${apiBaseUrl}/tasks/${taskId}`,
     type: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${apiKey}` // Adding authorization header
+    },
     dataType: 'json'
   }).fail((jqXHR, textStatus, errorThrown) => {
     console.error('Error deleting task:', textStatus, errorThrown);
@@ -78,7 +84,7 @@ export function deleteTask(taskId, apiKey) {
 $(document).ready(() => {
   // Load tasks and render them in the DOM
   const loadTasks = () => {
-    fetchTasks(window.env.API_KEY).then(tasks => {
+    fetchTasks().then(tasks => {
       $('#tasks-list').empty();
       if (Array.isArray(tasks)) {
         tasks.forEach(task => {
@@ -105,7 +111,7 @@ $(document).ready(() => {
   // Event handler for 'Mark Complete' button
   $('#tasks-list').on('click', '.mark-complete', function() {
     let taskId = $(this).data('task-id');
-    markTaskComplete(taskId, window.env.API_KEY).then(() => {
+    markTaskComplete(taskId).then(() => {
       loadTasks(); // Refresh the task list after marking complete
     }).catch(error => {
       console.error('Error marking task complete:', error);
@@ -115,7 +121,7 @@ $(document).ready(() => {
   // Event handler for 'Mark Active' button
   $('#tasks-list').on('click', '.mark-active', function() {
     let taskId = $(this).data('task-id');
-    markTaskActive(taskId, window.env.API_KEY).then(() => {
+    markTaskActive(taskId).then(() => {
       loadTasks(); // Refresh the task list after marking active
     }).catch(error => {
       console.error('Error marking task active:', error);
@@ -125,7 +131,7 @@ $(document).ready(() => {
   // Event handler for 'Delete Task' button
   $('#tasks-list').on('click', '.delete-task', function() {
     let taskId = $(this).data('task-id');
-    deleteTask(taskId, window.env.API_KEY).then(() => {
+    deleteTask(taskId).then(() => {
       loadTasks(); // Refresh the task list after deleting a task
     }).catch(error => {
       console.error('Error deleting task:', error);
@@ -136,7 +142,7 @@ $(document).ready(() => {
   $('#create-task-button').on('click', () => {
     const title = $('#task-title').val();
     const description = $('#task-description').val();
-    createTask(title, description, window.env.API_KEY).then(() => {
+    createTask(title, description).then(() => {
       loadTasks(); // Refresh the task list after creating a task
     }).catch(error => {
       console.error('Error creating task:', error);

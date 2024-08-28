@@ -1,14 +1,11 @@
 class ApplicationController < ActionController::Base
-    before_action :authenticate_user
+    skip_before_action :authenticate_user, only: :index
   
     private
   
     def authenticate_user
-      token = request.headers['Authorization']
-      @current_user = User.find_by(authentication_token: token)
-  
-      unless @current_user
-        render json: { error: 'Not Authorized' }, status: :unauthorized
-      end
+      @current_user = User.find_by(authentication_token: request.headers['Authorization'])
+      render json: { error: 'Not Authorized' }, status: :unauthorized unless @current_user
     end
-  end  
+  end
+  
