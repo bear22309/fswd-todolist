@@ -32,7 +32,6 @@ $(document).ready(function() {
 
   $('#addTaskButton').click(function() {
     const content = $('#taskTitle').val();
-    const description = $('#taskDescription').val();
     if (content) {
       createTask(content).then(() => {
         loadTasks();

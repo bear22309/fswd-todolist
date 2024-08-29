@@ -2,15 +2,15 @@ import $ from 'jquery';
 
 const apiBaseUrl = '/api';
 const apiKey = 1
-const qs = 'api_key=${apiKey}'
+const qs = `api_key=${apiKey}`
 
 export function createTask(content) {
-  return fetch('${apiBaseUrl}/tasks?${qs}', {
+  return fetch(`${apiBaseUrl}/tasks?${qs}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ task: { title, content } })
+    body: JSON.stringify({ task: { content } })
   }).then(response => {
     if (!response.ok) {
       throw new Error('Network response was not ok');
