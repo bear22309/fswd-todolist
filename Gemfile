@@ -42,7 +42,7 @@ group :development do
   gem 'spring'
 
   # Use sqlite3 as the database for Active Record
-  gem 'sqlite3', '~> 1.4.2'
+  gem 'sqlite3', '~> 1.5.0'
 end
 
 group :test do
